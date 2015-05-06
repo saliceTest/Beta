@@ -371,6 +371,9 @@ namespace xSaliceResurrected.Mid
                 if (_rOn)
                     return true;
 
+                if (Player.Mana > ESpell.ManaCost + QSpell.ManaCost)
+                    return true;
+
                 if (!menu.Item("charmCombo", true).GetValue<KeyBind>().Active)
                     return true;
 
