@@ -34,6 +34,7 @@ namespace xSaliceResurrected
 
         //Orbwalker instance
         protected static Orbwalking.Orbwalker Orbwalker;
+        protected static AzirManager AzirOrb;
 
         //Menu
         public static Menu menu;
@@ -57,9 +58,16 @@ namespace xSaliceResurrected
             menu.AddSubMenu(targetSelectorMenu);
 
             //Orbwalker submenu
-            menu.AddSubMenu(OrbwalkerMenu);
-            Orbwalker = new Orbwalking.Orbwalker(OrbwalkerMenu);
-            
+            if (Player.ChampionName.ToLower() == "azir")
+            {
+                menu.AddSubMenu(OrbwalkerMenu);
+                AzirOrb = new AzirManager(OrbwalkerMenu);
+            }
+            else
+            {
+                menu.AddSubMenu(OrbwalkerMenu);
+                Orbwalker = new Orbwalking.Orbwalker(OrbwalkerMenu);
+            }
             //Item Menu
             var itemMenu = new Menu("Items and Summoners", "Items");
             ItemManager.AddToMenu(itemMenu);

@@ -38,9 +38,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Managers\AzirManager.cs" />
     <Compile Include="Managers\LagManager.cs" />
     <Compile Include="Mid\Ahri.cs" />
     <Compile Include="Mid\Akali.cs" />
+    <Compile Include="Mid\Azir.cs" />
     <Compile Include="Mid\Jayce.cs" />
     <Compile Include="Mid\Urgot.cs" />
     <Compile Include="Mid\Viktor.cs" />
