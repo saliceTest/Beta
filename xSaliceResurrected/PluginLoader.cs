@@ -1,4 +1,5 @@
 ﻿using LeagueSharp;
+using xSaliceResurrected.ADC;
 using xSaliceResurrected.Mid;
 using xSaliceResurrected.Top;
 
@@ -34,6 +35,11 @@ namespace xSaliceResurrected
                         _loaded = true;
                         Game.PrintChat("<font color = \"#FFB6C1\">NOMNOMNOMNOMNOMNOMNOMNOMNOM LOADED! by xSalice</font>");
                         break;
+                    case "corki":
+                        new Corki();
+                        _loaded = true;
+                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
+                        break;
                     case "katarina":
                         new Katarina();
                         _loaded = true;
@@ -62,11 +68,6 @@ namespace xSaliceResurrected
                         break;
                     case "blitzcrank":
                         new Blitzcrank();
-                        loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
-                        break;
-                    case "corki":
-                        new Corki();
                         loaded = true;
                         Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
