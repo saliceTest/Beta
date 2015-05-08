@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ADC\Corki.cs" />
+    <Compile Include="ADC\Ezreal.cs" />
     <Compile Include="Managers\AzirManager.cs" />
     <Compile Include="Managers\LagManager.cs" />
     <Compile Include="Mid\Ahri.cs" />
@@ -91,9 +92,7 @@
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Events\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
