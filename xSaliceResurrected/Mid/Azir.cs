@@ -368,8 +368,6 @@ namespace xSaliceResurrected.Mid
             
         }
 
-        private int _delay;
-
         private GameObject GetNearestSoilderToMouse()
         {
             var soilder = AzirManager.Soilders.ToList().OrderBy(x => Game.CursorPos.Distance(x.Position));
