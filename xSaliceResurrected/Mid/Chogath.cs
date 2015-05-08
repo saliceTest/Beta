@@ -73,6 +73,7 @@ namespace xSaliceResurrected.Mid
                 //aoe
                 miscMenu.AddSubMenu(AoeSpellManager.AddHitChanceMenuCombo(true, true, false, false));
                 miscMenu.AddItem(new MenuItem("Q_Gap_Closer", "Use Q On Gap Closer", true).SetValue(true));
+                miscMenu.AddItem(new MenuItem("UseInt", "Use Q/E to Interrupt", true).SetValue(true));
                 miscMenu.AddItem(new MenuItem("smartKS", "Smart KS", true).SetValue(true));
                 miscMenu.AddItem(new MenuItem("R_KS", "Use R to KS", true).SetValue(true));
                 miscMenu.AddItem(new MenuItem("R_KS2", "Use Flash R to KS", true).SetValue(true));
@@ -320,6 +321,23 @@ namespace xSaliceResurrected.Mid
 
             if (Q.IsReady() && gapcloser.Sender.Distance(Player.Position) < 500)
                 Q.Cast(gapcloser.Sender);
+        }
+
+        protected override void Interrupter_OnPosibleToInterrupt(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs spell)
+        {
+            if (!menu.Item("UseInt", true).GetValue<bool>()) return;
+
+            if (Player.Distance(unit.Position) < W.Range && W.IsReady())
+            {
+                W.Cast(unit);
+                return;
+            }
+
+            if (Player.Distance(unit.Position) < Q.Range && Q.IsReady())
+            {
+                Q.Cast(unit);
+            }
+
         }
 
         protected override void Drawing_OnDraw(EventArgs args)

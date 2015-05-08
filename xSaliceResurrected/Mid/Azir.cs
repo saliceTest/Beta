@@ -831,7 +831,7 @@ namespace xSaliceResurrected.Mid
 
             if (Player.Distance(unit.Position) < R.Range && R.IsReady())
             {
-                R.CastOnUnit(unit);
+                R.Cast(unit);
             }
         }
 

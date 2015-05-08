@@ -38,6 +38,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ADC\Corki.cs" />
     <Compile Include="Managers\AzirManager.cs" />
     <Compile Include="Managers\LagManager.cs" />
     <Compile Include="Mid\Ahri.cs" />
