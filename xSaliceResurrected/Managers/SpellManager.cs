@@ -18,6 +18,7 @@ namespace xSaliceResurrected.Managers
         public static Spell E;
         public static Spell E2;
         public static Spell R;
+        public static Spell R2;
         public static readonly SpellDataInst QSpell = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q);
         public static readonly SpellDataInst ESpell = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E);
         public static readonly SpellDataInst WSpell = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W);

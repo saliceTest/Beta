@@ -50,6 +50,10 @@ namespace xSaliceResurrected.Base
         {
             get { return SpellManager.R; }
         }
+        protected static Spell R2
+        {
+            get { return SpellManager.R2; }
+        }
 
         protected static SpellDataInst QSpell
         {

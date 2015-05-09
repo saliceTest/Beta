@@ -17,8 +17,7 @@ namespace xSaliceResurrected.Utilities
 
         public static bool IsWall(Vector2 pos)
         {
-            return (NavMesh.GetCollisionFlags(pos.X, pos.Y) == CollisionFlags.Wall ||
-                    NavMesh.GetCollisionFlags(pos.X, pos.Y) == CollisionFlags.Building);
+            return (NavMesh.GetCollisionFlags(pos.To3D()).HasFlag(CollisionFlags.Wall) || NavMesh.GetCollisionFlags(pos.To3D()).HasFlag(CollisionFlags.Building));
         }
 
         public static bool IsPassWall(Vector3 start, Vector3 end)
