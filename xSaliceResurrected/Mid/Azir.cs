@@ -30,7 +30,8 @@ namespace xSaliceResurrected.Mid
             SpellManager.E = new Spell(SpellSlot.E, 2000);
             SpellManager.R = new Spell(SpellSlot.R, 450);
 
-            SpellManager.Q.SetSkillshot(0.1f, 100, 1700, false, SkillshotType.SkillshotLine);
+            SpellManager.Q.SetSkillshot(0, 80, 1600, false, SkillshotType.SkillshotCircle);
+            SpellManager.Q2.SetSkillshot(0, 80, 1600, false, SkillshotType.SkillshotCircle);
             SpellManager.E.SetSkillshot(0.25f, 100, 1200, false, SkillshotType.SkillshotLine);
             SpellManager.R.SetSkillshot(0.5f, 700, 1400, false, SkillshotType.SkillshotLine);
 
@@ -487,7 +488,7 @@ namespace xSaliceResurrected.Mid
 
         private void CastW(Obj_AI_Hero target)
         {
-            if (!Q.IsReady() && !(Player.Distance(target, true) <= W.RangeSqr) && W.Instance.Ammo < 2)
+            if (!Q.IsReady() && W.Instance.Ammo < 2 && !(Player.Distance(target, true) > W.RangeSqr))
                 return;
 
             var vec = Player.Distance(target, true) > W.RangeSqr ? Player.Position.To2D().Extend(target.Position.To2D(), W.Range) : target.Position.To2D();
