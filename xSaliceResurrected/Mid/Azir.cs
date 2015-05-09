@@ -488,9 +488,6 @@ namespace xSaliceResurrected.Mid
 
         private void CastW(Obj_AI_Hero target)
         {
-            if (!Q.IsReady() && W.Instance.Ammo < 2 && !(Player.Distance(target, true) > W.RangeSqr))
-                return;
-
             var vec = Player.Distance(target, true) > W.RangeSqr ? Player.Position.To2D().Extend(target.Position.To2D(), W.Range) : target.Position.To2D();
             W.Cast(vec);
         }
@@ -627,7 +624,7 @@ namespace xSaliceResurrected.Mid
             var tar = getNearestSoilderToEnemy(target);
             if (tar != null && Player.Distance(tar.Position) < 800)
             {
-                if (target != null && target.Distance(tar.Position) <= 390)
+                if (target != null && target.Distance(tar.Position) <= 350)
                 {
                     Orbwalking.Orbwalk(target, Game.CursorPos);
                 }
