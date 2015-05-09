@@ -55,6 +55,7 @@
     <Compile Include="Champion.cs" />
     <Compile Include="Mid\Chogath.cs" />
     <Compile Include="Mid\Katarina.cs" />
+    <Compile Include="Top\Irelia.cs" />
     <Compile Include="Top\Rumble.cs" />
     <Compile Include="Top\Vladimir.cs" />
     <Compile Include="Managers\SummonerManager.cs" />
