@@ -287,7 +287,7 @@ namespace xSaliceResurrected.Top
                     if (target.UnderTurret(true))
                         return;
 
-                if (Player.Distance(target.Position) > Q.Range / 2 && menu.Item("Q_Gap_Close", true).GetValue<bool>())
+                if (Player.Distance(target.Position, true) > Q.RangeSqr / 2 && menu.Item("Q_Gap_Close", true).GetValue<bool>())
                 {
                     var allMinionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
 
@@ -309,7 +309,7 @@ namespace xSaliceResurrected.Top
                     //check if can Q without activating
                     if (bestMinion != null)
                     {
-                        if (target.Distance(bestMinion.Position) < Q.Range && Player.Distance(bestMinion.Position) < Q.Range)
+                        if (target.Distance(bestMinion.Position, true) < Q.RangeSqr && Player.Distance(bestMinion.Position, true) < Q.RangeSqr)
                         {
                             var dmg2 = Player.GetSpellDamage(bestMinion, SpellSlot.Q);
 
@@ -332,7 +332,7 @@ namespace xSaliceResurrected.Top
                     }
                 }
 
-                if (Player.Distance(target.Position) > minDistance && Player.Distance(target.Position) < Q.Range + target.BoundingRadius)
+                if (Player.Distance(target.Position) > minDistance && Player.Distance(target.Position, true) < Q.RangeSqr + target.BoundingRadius)
                 {
                     Q.Cast(target);
                 }
@@ -516,6 +516,8 @@ namespace xSaliceResurrected.Top
             }
         }
 
+        private int _lastNotification;
+
         protected override void Drawing_OnDraw(EventArgs args)
         {
             if (menu.Item("Draw_Disabled", true).GetValue<bool>())
@@ -540,7 +542,11 @@ namespace xSaliceResurrected.Top
                     Vector2 wts = Drawing.WorldToScreen(target.Position);
                     if (GetComboDmgPercent(target) < 30 && R.IsReady())
                     {
-                        Notifications.AddNotification(target.BaseSkinName + " Is Killable!", 500);
+                        if (Utils.TickCount - _lastNotification > 0)
+                        {
+                            Notifications.AddNotification(target.BaseSkinName + " Is Killable!", 500);
+                            _lastNotification = Utils.TickCount + 5000;
+                        }
                     }
 
                     var enemyhp = target.Health / target.MaxHealth * 100;
