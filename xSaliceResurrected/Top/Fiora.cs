@@ -21,6 +21,7 @@ namespace xSaliceResurrected.Top
         private void SetSpells()
         {
             SpellManager.Q = new Spell(SpellSlot.Q, 600);
+            SpellManager.Q.SetTargetted(.25f, float.MaxValue);
 
             SpellManager.W = new Spell(SpellSlot.W);
 
@@ -273,13 +274,13 @@ namespace xSaliceResurrected.Top
                 //Q *2
                 if (Player.GetSpellDamage(target, SpellSlot.Q) * 2 > target.Health && Player.Distance(target.Position) < Q.Range && Q.IsReady())
                 {
-                    Q.CastOnUnit(target);
+                    Q.Cast(target);
                     return;
                 }
                 //Q
                 if (Player.GetSpellDamage(target, SpellSlot.Q) > target.Health && Player.Distance(target.Position) < Q.Range && Q.IsReady())
                 {
-                    Q.CastOnUnit(target);
+                    Q.Cast(target);
                     return;
                 }
             }
@@ -295,20 +296,22 @@ namespace xSaliceResurrected.Top
                 if (Q.IsReady() && target != null)
                 {
                     if (Q.IsKillable(target))
-                        Q.CastOnUnit(target);
+                        Q.Cast(target);
 
                     if (Player.GetSpellDamage(target, SpellSlot.Q) * 2 > target.Health)
-                        Q.CastOnUnit(target);
+                        Q.Cast(target);
 
-                    if (Environment.TickCount - Q.LastCastAttemptT > 3800)
-                        Q.CastOnUnit(target);
+                    if (Environment.TickCount - Q.LastCastAttemptT > 3800 && Environment.TickCount - Q.LastCastAttemptT < 4000)
+                        Q.Cast(target);
 
                     var minDistance = menu.Item("Q_Min_Distance", true).GetValue<Slider>().Value;
 
                     if (Player.Distance(target.Position, true) > Q.RangeSqr && menu.Item("Q_Gap_Close", true).GetValue<bool>())
                     {
-                        var allMinionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All,
-                            MinionTeam.NotAlly);
+                        var allMinionQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.NotAlly);
+
+                        if (allMinionQ.Count < 1)
+                            return;
 
                         Obj_AI_Base bestMinion = allMinionQ[0];
 
@@ -319,12 +322,22 @@ namespace xSaliceResurrected.Top
                                 if (target.Distance(minion.Position, true) < target.Distance(bestMinion.Position, true))
                                     bestMinion = minion;
                         }
+
+                        //check if can Q without activating
+                        if (bestMinion != null && Environment.TickCount - Q.LastCastAttemptT > 4000)
+                        {
+                            if (target.Distance(bestMinion.Position, true) < Q.RangeSqr && Player.Distance(bestMinion.Position, true) < Q.RangeSqr)
+                            {
+                                Q.Cast(bestMinion);
+                                return;
+                            }
+                        }
                     }
 
                     if (Player.Distance(target.Position) > minDistance &&
-                        Player.Distance(target.Position, true) < Q.RangeSqr + target.BoundingRadius)
+                        Player.Distance(target.Position, true) < Q.RangeSqr)
                     {
-                        Q.CastOnUnit(target);
+                        Q.Cast(target);
                     }
                 }
             }
@@ -334,7 +347,7 @@ namespace xSaliceResurrected.Top
                     return;
 
                 if (Q.IsReady() && Environment.TickCount - Q.LastCastAttemptT > 4000 && Player.Distance(target.Position) < Q.Range && Player.Distance(target.Position) > Player.AttackRange)
-                    Q.CastOnUnit(target);
+                    Q.Cast(target);
             }
         }
 
@@ -375,11 +388,11 @@ namespace xSaliceResurrected.Top
                 if (Player.GetSpellDamage(target, SpellSlot.R) /
                     target.CountEnemiesInRange(R.Range) >
                     target.Health - Player.GetAutoAttackDamage(target) * 2)
-                    R.CastOnUnit(target);
+                    R.Cast(target);
 
                 var rHpValue = menu.Item("R_If_HP", true).GetValue<Slider>().Value;
                 if (Player.HealthPercent <= rHpValue)
-                    R.CastOnUnit(target);
+                    R.Cast(target);
             }
 
         }
@@ -450,10 +463,10 @@ namespace xSaliceResurrected.Top
                     int mode = menu.Item("Combo_mode", true).GetValue<StringList>().SelectedIndex;
                     if (mode == 1)
                     {
-                        Q.CastOnUnit(target);
+                        Q.Cast(target);
 
                         if (QSpell.State == SpellState.Cooldown && R.IsReady())
-                            R.CastOnUnit(target);
+                            R.Cast(target);
                     }
                 }
             }
@@ -497,7 +510,7 @@ namespace xSaliceResurrected.Top
 
                 if (menu.Item(args.SData.Name + "R_Dodge", true).GetValue<bool>() && args.SData.Name == "SyndraR")
                 {
-                    Utility.DelayAction.Add(150, () => R.CastOnUnit(unit));
+                    Utility.DelayAction.Add(150, () => R.Cast(unit));
                     return;
                 }
 

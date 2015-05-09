@@ -331,7 +331,7 @@ namespace xSaliceResurrected.Top
                     }
                 }
 
-                if (Player.Distance(target.Position) > minDistance && Player.Distance(target.Position, true) < Q.RangeSqr + target.BoundingRadius)
+                if (Player.Distance(target.Position) > minDistance && Player.Distance(target.Position, true) < Q.RangeSqr)
                 {
                     Q.Cast(target);
                 }
