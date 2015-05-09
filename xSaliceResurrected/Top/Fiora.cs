@@ -416,7 +416,7 @@ namespace xSaliceResurrected.Top
 
             ModeSwitch();
 
-            if (Environment.TickCount - R.LastCastAttemptT < 750)
+            if (Environment.TickCount - R.LastCastAttemptT < 750 && _dodgeHero != null)
                 R.Cast(_dodgeHero);
 
             if (menu.Item("ComboActive", true).GetValue<KeyBind>().Active)
