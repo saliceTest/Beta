@@ -115,6 +115,7 @@ namespace xSaliceResurrected.Top
                 //miscMenu.AddItem(new MenuItem("Cast_EQ", "Cast EQ nearest target", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
                 miscMenu.AddItem(new MenuItem("E_Gap_Closer", "Use E On Gap Closer", true).SetValue(true));
                 miscMenu.AddItem(new MenuItem("QE_Interrupt", "Use Q/E to interrupt", true).SetValue(true));
+                miscMenu.AddItem(new MenuItem("smartKS", "Smart KS", true).SetValue(true));
                 //add to menu
                 menu.AddSubMenu(miscMenu);
             }
@@ -157,7 +158,6 @@ namespace xSaliceResurrected.Top
                 customMenu.AddItem(new MenuItem("enableCustMenu", "Enabled", true).SetValue(true));
                 customMenu.AddItem(myCust.AddToMenu("Combo Active: ", "ComboActive"));
                 customMenu.AddItem(myCust.AddToMenu("Harass Active: ", "HarassActive"));
-                customMenu.AddItem(myCust.AddToMenu("Harass(T) Active: ", "HarassActiveT"));
                 customMenu.AddItem(myCust.AddToMenu("Laneclear Active: ", "LaneClearActive"));
                 customMenu.AddItem(myCust.AddToMenu("LastHit Active: ", "LastHitKey"));
                 menu.AddSubMenu(customMenu);
@@ -264,7 +264,7 @@ namespace xSaliceResurrected.Top
             if (useW && allMinionsW.Count > 0 && W.IsReady())
                 W.Cast();
 
-            var rPred = R.GetLineFarmLocation(allMinionR, true);
+            var rPred = R.GetLineFarmLocation(allMinionR);
             if (useR && rPred.MinionsHit > 0 && R.IsReady())
                 R.Cast(rPred.Position);
         }
@@ -464,10 +464,40 @@ namespace xSaliceResurrected.Top
             }
         }
 
+        private void CheckKs()
+        {
+            foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range)).OrderByDescending(GetComboDamage))
+            {
+                //Q
+                if (Player.Distance(target) <= Q.Range && Player.GetSpellDamage(target, SpellSlot.Q) > target.Health && Q.IsReady())
+                {
+                    Q.Cast(target);
+                    return;
+                }
+
+                //E
+                if (Player.Distance(target) <= E.Range && Player.GetSpellDamage(target, SpellSlot.E) > target.Health && E.IsReady())
+                {
+                    E.Cast(target);
+                    return;
+                }
+
+                //R
+                if (Player.Distance(target) <= R.Range && Player.GetSpellDamage(target, SpellSlot.R) > target.Health && R.IsReady())
+                {
+                    R.Cast(target);
+                    return;
+                }
+            }
+        }
+
         protected override void Game_OnGameUpdate(EventArgs args)
         {
             //check if player is dead
             if (Player.IsDead) return;
+
+            if (menu.Item("smartKS", true).GetValue<bool>())
+                CheckKs();
 
             if (menu.Item("ComboActive", true).GetValue<KeyBind>().Active)
             {

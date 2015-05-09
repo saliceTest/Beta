@@ -253,7 +253,7 @@ namespace xSaliceResurrected.ADC
                 }
 
                 //R
-                if (Player.Distance(target) <= R.Range && Player.GetSpellDamage(target, SpellSlot.R) > target.Health && R.IsReady() && menu.Item("R_KS", true).GetValue<bool>())
+                if (Player.Distance(target) <= R.Range && Player.GetSpellDamage(target, SpellSlot.R) > target.Health && R.IsReady())
                 {
                     R.Cast(target);
                     return;
