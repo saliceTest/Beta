@@ -314,9 +314,9 @@ namespace xSaliceResurrected.Top
 
                         foreach (var minion in allMinionQ)
                         {
-                            if (target.Distance(minion.Position) < Q.Range && Player.Distance(minion.Position) < Q.Range &&
-                                target.Distance(minion.Position) < target.Distance(Player.Position))
-                                if (target.Distance(minion.Position) < target.Distance(bestMinion.Position))
+                            if (target.Distance(minion.Position, true) < Q.RangeSqr && Player.Distance(minion.Position, true) < Q.RangeSqr &&
+                                target.Distance(minion.Position, true) < target.Distance(Player.Position, true))
+                                if (target.Distance(minion.Position, true) < target.Distance(bestMinion.Position, true))
                                     bestMinion = minion;
                         }
                     }
@@ -490,7 +490,7 @@ namespace xSaliceResurrected.Top
                 }
             }
 
-            if (unit.IsEnemy && (unit is Obj_AI_Hero))
+            if (unit.IsEnemy && (unit is Obj_AI_Hero) && menu.Item(args.SData.Name + "R_Dodge", true) != null)
             {
                 if (Player.Distance(args.End) > R.Range || !R.IsReady())
                     return;
