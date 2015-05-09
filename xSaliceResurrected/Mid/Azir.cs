@@ -17,21 +17,20 @@ namespace xSaliceResurrected.Mid
             LoadMenu();
         }
 
-        private static Obj_AI_Base _insecTarget;
+        private static Obj_AI_Hero _insecTarget;
         private Vector3 _rVec;
+        private int qRange = 900;
 
         private void LoadSpells()
         {
             //intalize spell
-            SpellManager.Q = new Spell(SpellSlot.Q, 875);
-            SpellManager.QExtend = new Spell(SpellSlot.Q, 1150);
+            SpellManager.Q = new Spell(SpellSlot.Q, 900);
             SpellManager.Q2 = new Spell(SpellSlot.Q, 2000);
             SpellManager.W = new Spell(SpellSlot.W, 450);
             SpellManager.E = new Spell(SpellSlot.E, 2000);
             SpellManager.R = new Spell(SpellSlot.R, 450);
 
             SpellManager.Q.SetSkillshot(0.1f, 100, 1700, false, SkillshotType.SkillshotLine);
-            SpellManager.QExtend.SetSkillshot(0.1f, 100, 1700, false, SkillshotType.SkillshotLine);
             SpellManager.E.SetSkillshot(0.25f, 100, 1200, false, SkillshotType.SkillshotLine);
             SpellManager.R.SetSkillshot(0.5f, 700, 1400, false, SkillshotType.SkillshotLine);
 
@@ -66,14 +65,12 @@ namespace xSaliceResurrected.Mid
                 var qMenu = new Menu("QSpell", "QSpell");
                 {
                     qMenu.AddItem(new MenuItem("qOutRange", "Only Use When target out of range", true).SetValue(false));
-                    qMenu.AddItem(new MenuItem("qExtend", "Use Extended Q Range", true).SetValue(true));
                     spell.AddSubMenu(qMenu);
                 }
                 //W Menu
                 var wMenu = new Menu("WSpell", "WSpell");
                 {
                     wMenu.AddItem(new MenuItem("wAtk", "Always Atk Enemy", true).SetValue(true));
-                    wMenu.AddItem(new MenuItem("wQ", "Use WQ Poke", true).SetValue(true));
                     spell.AddSubMenu(wMenu);
                 }
                 //E Menu
@@ -88,7 +85,6 @@ namespace xSaliceResurrected.Mid
                 var rMenu = new Menu("RSpell", "RSpell");
                 {
                     rMenu.AddItem(new MenuItem("rHP", "if HP <", true).SetValue(new Slider(20)));
-                    rMenu.AddItem(new MenuItem("rHit", "If Hit >= Target", true).SetValue(new Slider(3, 0, 5)));
                     rMenu.AddItem(new MenuItem("rWall", "R Enemy Into Wall", true).SetValue(true));
                     spell.AddSubMenu(rMenu);
                 }
@@ -140,6 +136,7 @@ namespace xSaliceResurrected.Mid
             //Misc Menu:
             var misc = new Menu("Misc", "Misc");
             {
+                misc.AddSubMenu(AoeSpellManager.AddHitChanceMenuCombo(false, false, false, true));
                 misc.AddItem(new MenuItem("UseInt", "Use E to Interrupt", true).SetValue(true));
                 misc.AddItem(new MenuItem("UseGap", "Use R for GapCloser", true).SetValue(true));
                 misc.AddItem(new MenuItem("escapeDelay", "Escape Delay Decrease", true).SetValue(new Slider(0, 0, 300)));
@@ -150,7 +147,6 @@ namespace xSaliceResurrected.Mid
             var draw = new Menu("Drawings", "Drawings");
             {
                 draw.AddItem(new MenuItem("QRange", "Q range", true).SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
-                draw.AddItem(new MenuItem("QExtendRange", "Q Extended range", true).SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
                 draw.AddItem(new MenuItem("WRange", "W range", true).SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
                 draw.AddItem(new MenuItem("ERange", "E range", true).SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
                 draw.AddItem(new MenuItem("RRange", "R range", true).SetValue(new Circle(false, Color.FromArgb(100, 255, 0, 255))));
@@ -237,7 +233,7 @@ namespace xSaliceResurrected.Mid
             if (source == "Harass" && !ManaManager.HasMana(source))
                 return;
 
-            var qTarget = TargetSelector.GetTarget(QExtend.Range, TargetSelector.DamageType.Magical);
+            var qTarget = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var soilderTarget = TargetSelector.GetTarget(1200, TargetSelector.DamageType.Magical);
             var dmg = GetComboDamage(soilderTarget);
 
@@ -247,12 +243,6 @@ namespace xSaliceResurrected.Mid
             //R
             if (useR && R.IsReady() && ShouldR(qTarget) && Player.Distance(qTarget.Position) < R.Range)
                 R.Cast(qTarget);
-
-            //WQ
-            if (soilderCount() == 0 && useQ && useW && W.IsReady() && (Q.IsReady() || QSpell.State == SpellState.Surpressed) && menu.Item("wQ", true).GetValue<bool>())
-            {
-                CastWq(qTarget, source);
-            }
 
             //W
             if (useW && W.IsReady())
@@ -318,7 +308,7 @@ namespace xSaliceResurrected.Mid
                     //WQ
                     if ((Player.GetSpellDamage(target, SpellSlot.Q)) > target.Health + 20 && menu.Item("wqKS", true).GetValue<bool>())
                     {
-                        CastWq(target, "Null");
+                        CastW(target);
                     }
 
                     //qe
@@ -336,7 +326,8 @@ namespace xSaliceResurrected.Mid
             if (!unit.IsMe)
                 return;
 
-            if (args.SData.Name == "AzirE" && (QExtend.IsReady() || QSpell.State == SpellState.Surpressed))
+
+            if (args.SData.Name == "AzirE" && (Q.IsReady() || QSpell.State == SpellState.Surpressed))
             {
                 if (Utils.TickCount - E.LastCastAttemptT < 0)
                     Q2.Cast(Game.CursorPos);
@@ -391,11 +382,12 @@ namespace xSaliceResurrected.Mid
 
                     foreach (var slave in slaves)
                     {
-                        if (Player.Distance(target.Position) < 800)
+                        if (Player.Distance(target.Position) < qRange)
                         {
-                            var qPred = Util.GetP(slave.Position, QExtend, target, true);
+                            Q.UpdateSourcePosition(slave.Position, Player.ServerPosition);
+                            var qPred = Q.GetPrediction(target);
 
-                            if (Q.IsReady() && Player.Distance(target.Position) < 800 && qPred.Hitchance >= HitChanceManager.GetQHitChance(source))
+                            if (Q.IsReady() && Player.Distance(target.Position) < qRange && qPred.Hitchance >= HitChanceManager.GetQHitChance(source))
                             {
                                 var vec = target.ServerPosition - Player.ServerPosition;
                                 var castBehind = qPred.CastPosition + Vector3.Normalize(vec) * 75;
@@ -413,15 +405,15 @@ namespace xSaliceResurrected.Mid
             {
                 Vector3 wVec = Player.ServerPosition + Vector3.Normalize(target.ServerPosition - Player.ServerPosition) * W.Range;
 
-                var qPred = Util.GetP(wVec, QExtend, target, true);
+                var qPred = Util.GetP(wVec, Q, target, true);
 
-                if ((Q.IsReady() || QSpell.State == SpellState.Surpressed) && (E.IsReady() || ESpell.State == SpellState.Surpressed) && Player.Distance(target.Position) < 800 && qPred.Hitchance >= HitChanceManager.GetQHitChance(source))
+                if ((Q.IsReady() || QSpell.State == SpellState.Surpressed) && (E.IsReady() || ESpell.State == SpellState.Surpressed) && Player.Distance(target.Position) < qRange && qPred.Hitchance >= HitChanceManager.GetQHitChance(source))
                 {
                     var vec = target.ServerPosition - Player.ServerPosition;
                     var castBehind = qPred.CastPosition + Vector3.Normalize(vec) * 75;
 
                     W.Cast(wVec);
-                    QExtend.Cast(castBehind);
+                    Q.Cast(castBehind);
                     Utility.DelayAction.Add(1, () => E.Cast(getNearestSoilderToEnemy(target).Position));
                 }
             }
@@ -429,7 +421,7 @@ namespace xSaliceResurrected.Mid
 
         private void Insec()
         {
-            var target = (Obj_AI_Hero)_insecTarget;
+            var target = _insecTarget;
 
             if (target == null)
                 return;
@@ -442,9 +434,9 @@ namespace xSaliceResurrected.Mid
 
                     foreach (var slave in slaves)
                     {
-                        if (Player.Distance(target.Position) < 800)
+                        if (Player.Distance(target.Position) < qRange && slave.IsValid)
                         {
-                            var qPred = Util.GetP(slave.Position, QExtend, target, true);
+                            var qPred = Util.GetP(slave.Position, Q, target, true);
                             var vec = target.ServerPosition - Player.ServerPosition;
                             var castBehind = qPred.CastPosition + Vector3.Normalize(vec) * 75;
                             _rVec = qPred.CastPosition - Vector3.Normalize(vec) * 300;
@@ -470,17 +462,17 @@ namespace xSaliceResurrected.Mid
             {
                 Vector3 wVec = Player.ServerPosition + Vector3.Normalize(target.ServerPosition - Player.ServerPosition) * W.Range;
 
-                var qPred = Util.GetP(wVec, QExtend, target, true);
+                var qPred = Util.GetP(wVec, Q, target, true);
 
-                if ((Q.IsReady() || QSpell.State == SpellState.Surpressed) && (E.IsReady() || ESpell.State == SpellState.Surpressed)
-                    && R.IsReady() && Player.Distance(target.Position) < 800 && qPred.Hitchance >= HitChanceManager.GetQHitChance("Combo"))
+                if ((Q.IsReady() || QSpell.State == SpellState.Surpressed) && (E.IsReady() || ESpell.State == SpellState.Surpressed) && getNearestSoilderToEnemy(target) != null
+                    && R.IsReady() && Player.Distance(target.Position) < qRange && qPred.Hitchance >= HitChanceManager.GetQHitChance("Combo"))
                 {
                     var vec = target.ServerPosition - Player.ServerPosition;
                     var castBehind = qPred.CastPosition + Vector3.Normalize(vec) * 75;
                     _rVec = Player.Position;
 
                     W.Cast(wVec);
-                    QExtend.Cast(castBehind);
+                    Q.Cast(castBehind);
                     E.Cast(getNearestSoilderToEnemy(target).Position);
                 }
                 if (R.IsReady())
@@ -493,31 +485,9 @@ namespace xSaliceResurrected.Mid
             }
         }
 
-        private void CastWq(Obj_AI_Hero target, string source)
-        {
-            if (soilderCount() < 1 && menu.Item("qMulti", true).GetValue<KeyBind>().Active)
-                return;
-
-            if (Player.Distance(target.Position) < 1150 && Player.Distance(target.Position) > W.Range)
-            {
-                if (W.IsReady() && (Q.IsReady() || QSpell.State == SpellState.Surpressed))
-                {
-                    Vector3 wVec = Player.ServerPosition + Vector3.Normalize(target.ServerPosition - Player.ServerPosition) * W.Range;
-
-                    var qPred = Util.GetP(wVec, QExtend, target, true);
-
-                    if (qPred.Hitchance >= HitChanceManager.GetQHitChance(source))
-                    {
-                        W.Cast(wVec);
-                        QExtend.Cast(qPred.CastPosition);
-                    }
-                }
-            }
-        }
-
         private void CastW(Obj_AI_Hero target)
         {
-            if (!Q.IsReady() && !(Player.Distance(target, true) <= W.RangeSqr))
+            if (!Q.IsReady() && !(Player.Distance(target, true) <= W.RangeSqr) && W.Instance.Ammo < 2)
                 return;
 
             var vec = Player.Distance(target, true) > W.RangeSqr ? Player.Position.To2D().Extend(target.Position.To2D(), W.Range) : target.Position.To2D();
@@ -533,20 +503,15 @@ namespace xSaliceResurrected.Mid
 
             foreach (var slave in slaves)
             {
-                if (target != null && Player.Distance(target.Position) < QExtend.Range && ShouldQ(target, slave))
+                if (Player.Distance(target.Position) < Q.Range && ShouldQ(target, slave))
                 {
 
-                    var qPred = Util.GetP(slave.Position, QExtend, target, true);
+                    Q.UpdateSourcePosition(slave.Position, Player.ServerPosition);
+                    var qPred = Q.GetPrediction(target);
 
-                    if (Q.IsReady() && Player.Distance(target.Position) < 800 && qPred.Hitchance >= HitChanceManager.GetQHitChance(source))
+                    if (Q.IsReady() && Player.Distance(target.Position) < qRange && qPred.Hitchance >= HitChanceManager.GetQHitChance(source))
                     {
                         Q.Cast(qPred.CastPosition);
-                        return;
-                    }
-                    if (Q.IsReady() && Player.Distance(target.Position) > 800 && qPred.Hitchance >= HitChanceManager.GetQHitChance(source) && menu.Item("qExtend", true).GetValue<bool>())
-                    {
-                        var qVector = Player.ServerPosition + Vector3.Normalize(qPred.CastPosition - Player.ServerPosition) * 800;
-                        QExtend.Cast(qVector);
                         return;
                     }
                 }
@@ -623,13 +588,7 @@ namespace xSaliceResurrected.Mid
                 return true;
 
             var hp = menu.Item("rHP", true).GetValue<Slider>().Value;
-            var hpPercent = Player.Health / Player.MaxHealth * 100;
-            if (hpPercent < hp)
-                return true;
-
-            var rHit = menu.Item("rHit", true).GetValue<Slider>().Value;
-            var pred = R.GetPrediction(target);
-            if (pred.AoeTargetsHitCount >= rHit)
+            if (Player.HealthPercent < hp)
                 return true;
 
             if (WallStun(target) && GetComboDamage(target) > target.Health / 2 && menu.Item("rWall", true).GetValue<bool>())
@@ -708,7 +667,8 @@ namespace xSaliceResurrected.Mid
                         foreach (var enemy in allMinionsQ)
                         {
                             hit = 0;
-                            var prediction = Util.GetP(slave.Position, Q, enemy, true);
+                            Q.UpdateSourcePosition(slave.Position, Player.ServerPosition);
+                            var prediction = Q.GetPrediction(enemy);
 
                             if (Q.IsReady() && Player.Distance(enemy.Position) <= Q.Range)
                             {
@@ -734,7 +694,8 @@ namespace xSaliceResurrected.Mid
                     foreach (var enemy in allMinionsQ)
                     {
                         hit = 0;
-                        var prediction = Util.GetP(Player.ServerPosition, Q, enemy, true);
+                        Q.UpdateSourcePosition(Player.Position, Player.ServerPosition);
+                        var prediction = Q.GetPrediction(enemy);
 
                         if (Q.IsReady() && Player.Distance(enemy.Position) <= Q.Range)
                         {
@@ -811,8 +772,8 @@ namespace xSaliceResurrected.Mid
                 if (menuItem.Active)
                     Render.Circle.DrawCircle(Player.Position, spell.Range, menuItem.Color);
             }
-            if (menu.Item("QExtendRange", true).GetValue<Circle>().Active)
-                Render.Circle.DrawCircle(Player.Position, QExtend.Range, Color.LightBlue);
+            if (menu.Item("QRange", true).GetValue<Circle>().Active)
+                Render.Circle.DrawCircle(Player.Position, Q.Range, Color.LightBlue);
         }
 
         protected override void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
