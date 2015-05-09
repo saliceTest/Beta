@@ -460,7 +460,7 @@ namespace xSaliceResurrected.Top
                     if (menu.Item("E_Reset", true).GetValue<bool>() && E.IsReady())
                     {
                         E.Cast();
-                        Utility.DelayAction.Add(100, () => Orbwalking.ResetAutoAttackTimer());
+                        Utility.DelayAction.Add(100, Orbwalking.ResetAutoAttackTimer);
                     }
                     int mode = menu.Item("Combo_mode", true).GetValue<StringList>().SelectedIndex;
                     if (mode == 1)
