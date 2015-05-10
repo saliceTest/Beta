@@ -278,7 +278,7 @@ namespace xSaliceResurrected.Mid
                 foreach (
                     Obj_AI_Hero target in
                         ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(x => rObj.Position.Distance(x.ServerPosition) < 1500 && x.IsEnemy && !x.IsDead).OrderBy(x => x.Health))
+                            .Where(x => x.IsValidTarget(1500)).OrderByDescending(x => x.Distance(rObj.Position)))
                 {
                     if (target != null)
                     {
@@ -425,7 +425,7 @@ namespace xSaliceResurrected.Mid
             {
                 if (obj.IsValid && obj.Name.Contains("Viktor_Base_R"))
                 {
-                    //Game.PrintChat("woot");
+                    Console.WriteLine("R activated");
                     activeR = true;
                     rObj = obj;
                 }
