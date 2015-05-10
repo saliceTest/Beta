@@ -103,7 +103,7 @@ namespace xSaliceResurrected.Managers
             //loop one
             foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(spell.Range)))
             {
-                //loop 2
+               //loop 2
                 var target1 = target;
                 var target2 = target;
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(spell.Range + spell2.Range) && x.NetworkId != target1.NetworkId
@@ -179,15 +179,12 @@ namespace xSaliceResurrected.Managers
 
                 var vector1 = Player.ServerPosition + Vector3.Normalize(target.ServerPosition - Player.ServerPosition) * (spell.Range * extraPrerange);
 
-                spell2.UpdateSourcePosition(vector1, vector1);
-
                 var pred = spell2.GetPrediction(target, true);
                 Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
 
                 if (Player.Distance(target) < spell.Range)
                 {
                     vector1 = pred.CastPosition.Extend(target.ServerPosition, spell2.Range*.3f);
-                    spell2.UpdateSourcePosition(vector1, vector1);
                     Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
 
                     if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.Medium)
@@ -270,7 +267,6 @@ namespace xSaliceResurrected.Managers
 
             if (maxHit >= 2)
             {
-                spell2.UpdateSourcePosition(start, start);
                 Vector2 wts = Drawing.WorldToScreen(Player.Position);
                 Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + maxHit);
 
