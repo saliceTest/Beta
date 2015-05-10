@@ -205,6 +205,11 @@ namespace xSaliceResurrected.Mid
 
             var dmg = GetComboDamage(target);
 
+            if (useE && E.IsReady())
+            {
+                SpellCastManager.CastBestLine(true, E, E2, (int)(E2.Range / 2), menu, 1, false);
+            }
+
             if (useW &&  W.IsReady() && ShouldW(target, dmg))
             {
                 W.Cast(target);
@@ -230,10 +235,6 @@ namespace xSaliceResurrected.Mid
                 if (target != null) R.Cast(target.Position);
             }
 
-            if (useE && E.IsReady())
-            {
-                SpellCastManager.CastBestLine(true, E, E2, (int)(E2.Range/2), menu, 1, false);
-            }
         }
 
         private bool ShouldW(Obj_AI_Hero target, float dmg)
