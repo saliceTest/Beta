@@ -69,8 +69,8 @@ namespace xSaliceResurrected.Mid
 
                 var eMenu = new Menu("EMenu", "EMenu");
                 {
-                    eMenu.AddItem(new MenuItem("Line_If_Enemy_Count", "Auto R If >= Enemy, 6 = Off", true).SetValue(new Slider(4, 1, 6)));
-                    eMenu.AddItem(new MenuItem("Line_If_Enemy_Count_Combo", "R if >= In Combo, 6 = off", true).SetValue(new Slider(3, 1, 6)));
+                    eMenu.AddItem(new MenuItem("Line_If_Enemy_Count", "Auto E If >= Enemy, 6 = Off", true).SetValue(new Slider(4, 1, 6)));
+                    eMenu.AddItem(new MenuItem("Line_If_Enemy_Count_Combo", "E if >= In Combo, 6 = off", true).SetValue(new Slider(3, 1, 6)));
                     spellMenu.AddSubMenu(eMenu);
                 }
 
