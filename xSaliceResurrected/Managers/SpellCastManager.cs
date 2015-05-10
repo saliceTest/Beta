@@ -161,10 +161,9 @@ namespace xSaliceResurrected.Managers
             }            
 
             //check if only one target
-            if (Player.CountEnemiesInRange(spell.Range + spell2.Range) < 2 && forceUlt)
+            if (forceUlt)
             {
                 CastSingleLine(spell, spell2, wallCheck, extraPrerange);
-                return;
             }
         }
 
