@@ -96,13 +96,6 @@ namespace xSaliceResurrected.Managers
         //rumble = R, R2, 600
         public static void CastBestLine(bool forceUlt, Spell spell, Spell spell2, int midPointRange, Menu menu, float extraPrerange = 1, bool wallCheck = true)
         {
-            //check if only one target
-            if (Player.CountEnemiesInRange(spell.Range + spell2.Range) < 2 && forceUlt)
-            {
-                CastSingleLine(spell, spell2, wallCheck, extraPrerange);
-                return;
-            }
-
             int maxHit = 0;
             Vector3 start = Vector3.Zero;
             Vector3 end = Vector3.Zero;
@@ -165,6 +158,13 @@ namespace xSaliceResurrected.Managers
                     CastLineSpell(spell2, start, end);
                 if (maxHit >= menu.Item("Line_If_Enemy_Count", true).GetValue<Slider>().Value)
                     CastLineSpell(spell2, start, end);
+            }            
+
+            //check if only one target
+            if (Player.CountEnemiesInRange(spell.Range + spell2.Range) < 2 && forceUlt)
+            {
+                CastSingleLine(spell, spell2, wallCheck, extraPrerange);
+                return;
             }
         }
 
