@@ -419,7 +419,7 @@ namespace xSaliceResurrected.Top
                     Render.Circle.DrawCircle(Player.Position, R.Range, R.IsReady() ? Color.Green : Color.Red);
 
 
-            if (menu.Item("Draw_R_Pred", true).GetValue<bool>())
+            if (menu.Item("Draw_R_Pred", true).GetValue<bool>() && R.IsReady())
             {
                 SpellCastManager.DrawBestLine(R, R2, (int)(R2.Range/2), .9f);
             }
