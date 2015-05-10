@@ -108,6 +108,7 @@ namespace xSaliceResurrected.Mid
 
             var miscMenu = new Menu("Misc", "Misc");
             {
+                miscMenu.AddSubMenu(AoeSpellManager.AddHitChanceMenuCombo(false, true, false, true));
                 miscMenu.AddItem(new MenuItem("UseInt", "Use R to Interrupt", true).SetValue(true));
                 //add to menu
                 menu.AddSubMenu(miscMenu);
