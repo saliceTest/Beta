@@ -169,48 +169,6 @@ namespace xSaliceResurrected.Managers
 
         public static void DrawBestLine(Spell spell, Spell spell2, int midPointRange, float extraPrerange = 1, bool wallCheck = true)
         {
-            if (Player.CountEnemiesInRange(spell.Range + spell2.Range) < 2)
-            {
-                //-------------------------------Single---------------------------
-                var target = TargetSelector.GetTarget(spell.Range + spell2.Range, TargetSelector.DamageType.Magical);
-
-                if (target == null)
-                    return;
-
-                var vector1 = Player.ServerPosition + Vector3.Normalize(target.ServerPosition - Player.ServerPosition) * (spell.Range * extraPrerange);
-
-                var pred = spell2.GetPrediction(target, true);
-                Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
-
-                if (Player.Distance(target) < spell.Range)
-                {
-                    vector1 = pred.CastPosition.Extend(target.ServerPosition, spell2.Range*.3f);
-                    Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
-
-                    if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.Medium)
-                    {
-                        Vector2 wts = Drawing.WorldToScreen(Player.Position);
-                        Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
-
-                        rec2.Draw(Color.Blue, 4);
-                    }
-
-                }
-                else if (!rec1.Points.Exists(Util.IsWall) || !wallCheck)
-                {
-                    //wall check
-                    if (pred.Hitchance >= HitChance.Medium)
-                    {
-                        Vector2 wts = Drawing.WorldToScreen(Player.Position);
-                        Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
-
-                        rec1.Draw(Color.Blue, 4);
-                    }
-                }
-
-                return;
-            }
-
             //---------------------------------MEC----------------------------
             int maxHit = 0;
             Vector3 start = Vector3.Zero;
@@ -242,7 +200,7 @@ namespace xSaliceResurrected.Managers
                         //loop 3
                         var target3 = target;
                         var enemy1 = enemy;
-                        foreach (var enemy2 in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(spell.Range + spell2.Range) && x.NetworkId != target3.NetworkId && x.NetworkId != enemy1.NetworkId && x.Distance(target3.Position) < 1000))
+                        foreach (var enemy2 in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(spell.Range + spell2.Range) && x.NetworkId != target3.NetworkId && x.NetworkId != enemy1.NetworkId && x.Distance(target3.Position) < spell2.Range))
                         {
                             var enemy2Pred = Prediction.GetPrediction(enemy2, spell.Delay);
                             Object[] obj = Util.VectorPointProjectionOnLineSegment(startpos.To2D(), endPos.To2D(), enemy2Pred.CastPosition.To2D());
@@ -272,6 +230,44 @@ namespace xSaliceResurrected.Managers
 
                 Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(start, end, spell.Width);
                 rec1.Draw(Color.Blue, 4);
+                return;
+            }
+
+            //-------------------------------Single---------------------------
+            var unit = TargetSelector.GetTarget(spell.Range + spell2.Range, TargetSelector.DamageType.Magical);
+
+            if (unit == null)
+                return;
+
+            var vector1 = Player.ServerPosition + Vector3.Normalize(unit.ServerPosition - Player.ServerPosition) * (spell.Range * extraPrerange);
+
+            var pred = spell2.GetPrediction(unit, true);
+            Geometry.Polygon.Rectangle rectangle = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
+
+            if (Player.Distance(unit) < spell.Range)
+            {
+                vector1 = pred.CastPosition.Extend(unit.ServerPosition, spell2.Range * .3f);
+                Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
+
+                if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.Medium)
+                {
+                    Vector2 wts = Drawing.WorldToScreen(Player.Position);
+                    Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
+
+                    rec2.Draw(Color.Blue, 4);
+                }
+
+            }
+            else if (!rectangle.Points.Exists(Util.IsWall) || !wallCheck)
+            {
+                //wall check
+                if (pred.Hitchance >= HitChance.Medium)
+                {
+                    Vector2 wts = Drawing.WorldToScreen(Player.Position);
+                    Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
+
+                    rectangle.Draw(Color.Blue, 4);
+                }
             }
         }
 
