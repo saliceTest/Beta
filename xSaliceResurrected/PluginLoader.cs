@@ -70,6 +70,11 @@ namespace xSaliceResurrected
                         _loaded = true;
                         Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
+                    case "viktor":
+                        new Viktor();
+                        _loaded = true;
+                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
+                        break;
                     case "vladimir":
                         new Vladimir();
                         _loaded = true;

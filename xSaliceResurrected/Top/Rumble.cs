@@ -26,11 +26,11 @@ namespace xSaliceResurrected.Top
             SpellManager.W = new Spell(SpellSlot.W);
             SpellManager.E = new Spell(SpellSlot.E, 950);
             SpellManager.R = new Spell(SpellSlot.R, 1700);
-            SpellManager.R2 = new Spell(SpellSlot.R, 800);
+            SpellManager.R2 = new Spell(SpellSlot.R, 1000);
 
-            SpellManager.E.SetSkillshot(0.45f, 90, 1200, true, SkillshotType.SkillshotLine);
-            SpellManager.R.SetSkillshot(0.25f, 110, 2500, false, SkillshotType.SkillshotLine);
-            SpellManager.R2.SetSkillshot(0.25f, 110, 2600, false, SkillshotType.SkillshotLine);
+            SpellManager.E.SetSkillshot(0.25f, 70, 1200, true, SkillshotType.SkillshotLine);
+            SpellManager.R.SetSkillshot(0.4f, 130, 2500, false, SkillshotType.SkillshotCircle);
+            SpellManager.R2.SetSkillshot(0.4f, 130, 2600, false, SkillshotType.SkillshotCircle);
         }
 
         private void LoadMenu()
@@ -73,8 +73,8 @@ namespace xSaliceResurrected.Top
 
                 var rMenu = new Menu("RMenu", "RMenu");
                 {
-                    rMenu.AddItem(new MenuItem("R_If_Enemy_Count", "Auto R If >= Enemy, 6 = Off", true).SetValue(new Slider(4, 1, 6)));
-                    rMenu.AddItem(new MenuItem("R_If_Enemy_Count_Combo", "R if >= In Combo, 6 = off", true).SetValue(new Slider(3, 1, 6)));
+                    rMenu.AddItem(new MenuItem("Line_If_Enemy_Count", "Auto R If >= Enemy, 6 = Off", true).SetValue(new Slider(4, 1, 6)));
+                    rMenu.AddItem(new MenuItem("Line_If_Enemy_Count_Combo", "R if >= In Combo, 6 = off", true).SetValue(new Slider(3, 1, 6)));
                     spellMenu.AddSubMenu(rMenu);
                 }
 
@@ -230,7 +230,7 @@ namespace xSaliceResurrected.Top
                 E.Cast(target);
 
             if (useR && GetComboDamage(target) > target.Health)
-                CastSingleR();
+                SpellCastManager.CastSingleLine(R, R2, true);
         }
 
         private void Farm()
@@ -343,125 +343,12 @@ namespace xSaliceResurrected.Top
             return Player.Mana;
         }
 
-        private void CastSingleR()
-        {
-            var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-
-            if (target == null)
-                return;
-
-            var vector1 = target.ServerPosition - Vector3.Normalize(target.ServerPosition - Player.ServerPosition) * 300;
-
-            R2.UpdateSourcePosition(vector1, vector1);
-
-            var pred = R2.GetPrediction(target, true);
-            Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, 1000), R.Width);
-
-            if (Player.Distance(target.Position) < 400)
-            {
-                var midpoint = (Player.ServerPosition + pred.UnitPosition) / 2;
-
-                vector1 = midpoint + Vector3.Normalize(pred.UnitPosition - Player.ServerPosition) * 800;
-                var vector2 = midpoint - Vector3.Normalize(pred.UnitPosition - Player.ServerPosition) * 300;
-
-                Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector1, vector2, R.Width);
-                if(!rec2.Points.Exists(Util.IsWall))
-                    CastR(vector1, vector2);
-                
-            }
-            else if (!rec1.Points.Exists(Util.IsWall))
-            {
-                //wall check
-                if (pred.Hitchance >= HitChance.Medium)
-                    CastR(vector1, pred.CastPosition);
-            }
-        }
-
-        private void CastMecR(bool forceUlt)
-        {
-            //check if only one target
-            if (Player.CountEnemiesInRange(R.Range + 500) < 2 && forceUlt)
-            {
-                CastSingleR();
-                return;
-            }
-
-            int maxHit = 0;
-            Vector3 start = Vector3.Zero;
-            Vector3 end = Vector3.Zero;
-
-            //loop one
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range)).OrderByDescending(GetComboDamage))
-            {
-                //loop 2
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range + 1000) && x.NetworkId != target.NetworkId && x.Distance(target.Position) < 900)
-                    .OrderByDescending(x => x.Distance(target.Position)))
-                {
-                    int hit = 2;
-
-                    var targetPred = Prediction.GetPrediction(target, .25f);
-                    var enemyPred = Prediction.GetPrediction(enemy, .25f);
-
-                    var midpoint = (enemyPred.CastPosition + targetPred.CastPosition) / 2;
-
-                    var startpos = midpoint + Vector3.Normalize(enemyPred.CastPosition - targetPred.CastPosition) * 600;
-                    var endPos = midpoint - Vector3.Normalize(enemyPred.CastPosition - targetPred.CastPosition) * 600;
-
-                    Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(startpos, endPos, R.Width);
-
-                    if (!rec1.Points.Exists(Util.IsWall) && Player.CountEnemiesInRange(R.Range + 1000) > 2)
-                    {
-                        //loop 3
-                        foreach (var enemy2 in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range + 1000) && x.NetworkId != target.NetworkId && x.NetworkId != enemy.NetworkId && x.Distance(target.Position) < 1000))
-                        {
-                            var enemy2Pred = Prediction.GetPrediction(enemy2, .25f);
-                            Object[] obj = Util.VectorPointProjectionOnLineSegment(startpos.To2D(), endPos.To2D(), enemy2Pred.CastPosition.To2D());
-                            var isOnseg = (bool)obj[2];
-                            var pointLine = (Vector2)obj[1];
-
-                            if (pointLine.Distance(enemy2Pred.CastPosition.To2D()) < 110 && isOnseg)
-                            {
-                                hit++;
-                            }
-                        }
-                    }
-
-                    if (hit > maxHit && hit > 1 && !rec1.Points.Exists(Util.IsWall))
-                    {
-                        maxHit = hit;
-                        start = startpos;
-                        end = endPos;
-                    }
-                }
-            }
-
-            if (start != Vector3.Zero && end != Vector3.Zero && R.IsReady())
-            {
-                if (forceUlt)
-                    CastR(start, end);
-                if (menu.Item("ComboActive", true).GetValue<KeyBind>().Active && maxHit >= menu.Item("R_If_Enemy_Count_Combo", true).GetValue<Slider>().Value)
-                    CastR(start, end);
-                if (maxHit >= menu.Item("R_If_Enemy_Count", true).GetValue<Slider>().Value)
-                    CastR(start, end);
-            }
-
-
-        }
-
-        private void CastR(Vector3 source, Vector3 destination)
-        {
-            if (!R.IsReady())
-                return;
-
-            R2.Cast(source, destination);
-        }
-
         protected override void Game_OnGameUpdate(EventArgs args)
         {
             if (Player.IsDead)
                 return;
 
-            CastMecR(false);
+            SpellCastManager.CastBestLine(false, R, R2, (int)(R2.Range / 2), menu, .9f);
 
             if (menu.Item("ComboActive", true).GetValue<KeyBind>().Active)
             {
@@ -470,7 +357,7 @@ namespace xSaliceResurrected.Top
             else
             {
                 if (menu.Item("UseMecR", true).GetValue<KeyBind>().Active)
-                    CastMecR(true);
+                    SpellCastManager.CastBestLine(true, R, R2, (int)(R2.Range / 2 + 100), menu, .9f);
 
                 if (menu.Item("LastHitE", true).GetValue<KeyBind>().Active)
                     LastHit();
@@ -499,18 +386,6 @@ namespace xSaliceResurrected.Top
                     W.Cast();
                 }
             }
-
-            /*
-            if (!unit.IsMe)
-                return;
-            
-            SpellSlot castedSlot = Player.GetSpellSlot(args.SData.Name, false);
-
-            if (castedSlot == SpellSlot.E)
-            {
-                E.LastCastAttemptT = Environment.TickCount;
-            }
-            */
         }
 
         protected override void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -544,118 +419,9 @@ namespace xSaliceResurrected.Top
                     Render.Circle.DrawCircle(Player.Position, R.Range, R.IsReady() ? Color.Green : Color.Red);
 
 
-            if (menu.Item("Draw_R_Pred", true).GetValue<bool>() && R.IsReady())
+            if (menu.Item("Draw_R_Pred", true).GetValue<bool>())
             {
-                if (Player.CountEnemiesInRange(R.Range + 500) < 2)
-                {
-                    var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-
-                    if (target == null)
-                        return;
-
-                    var vector1 = target.ServerPosition - Vector3.Normalize(target.ServerPosition - Player.ServerPosition) * 300;
-                    R2.UpdateSourcePosition(vector1, vector1);
-                    var pred = R2.GetPrediction(target, true);
-                    Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, 1000), R.Width);
-
-                    if (Player.Distance(target.Position) < 400)
-                    {
-                        var midpoint = (Player.ServerPosition + pred.UnitPosition) / 2;
-
-                        vector1 = midpoint + Vector3.Normalize(pred.UnitPosition - Player.ServerPosition) * 800;
-                        var vector2 = midpoint - Vector3.Normalize(pred.UnitPosition - Player.ServerPosition) * 300;
-
-                        Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector1, vector2, R.Width);
-
-                        if (!rec2.Points.Exists(Util.IsWall))
-                        {
-                            Vector2 wts = Drawing.WorldToScreen(Player.Position);
-                            Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
-
-                            rec2.Draw(Color.Red);
-                        }
-                    }
-                    else if (!rec1.Points.Exists(Util.IsWall))
-                    {
-                        if (pred.Hitchance >= HitChance.Medium)
-                        {
-                            Vector2 wts = Drawing.WorldToScreen(Player.Position);
-                            Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
-
-                            rec1.Draw(Color.Red);
-                        }
-                    }
-                    return;
-                }
-
-                //-----------------------------------------------------------------Draw Ult Mec-----------------------------------------------
-                int maxHit = 0;
-                Vector3 start = Vector3.Zero;
-                Vector3 end = Vector3.Zero;
-
-                //loop one
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range)).OrderByDescending(GetComboDamage))
-                {
-                    //loop 2
-                    foreach (
-                        var enemy in
-                            ObjectManager.Get<Obj_AI_Hero>()
-                                .Where(
-                                    x =>
-                                        x.IsValidTarget(R.Range + 1000) && x.NetworkId != target.NetworkId &&
-                                        x.Distance(target.Position) < 900)
-                                .OrderByDescending(x => x.Distance(target.Position)))
-                    {
-                        int hit = 2;
-
-                        var targetPred = Prediction.GetPrediction(target, .25f);
-                        var enemyPred = Prediction.GetPrediction(enemy, .25f);
-
-                        var midpoint = (enemyPred.CastPosition + targetPred.CastPosition) / 2;
-
-                        var startpos = midpoint + Vector3.Normalize(enemyPred.CastPosition - targetPred.CastPosition) * 600;
-                        var endPos = midpoint - Vector3.Normalize(enemyPred.CastPosition - targetPred.CastPosition) * 600;
-
-                        Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(startpos, endPos, R.Width);
-
-                        if (!rec1.Points.Exists(Util.IsWall) && Player.CountEnemiesInRange(R.Range + 1000) > 2)
-                        {
-                            //loop 3
-                            foreach (var enemy2 in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range + 1000) && x.NetworkId != target.NetworkId && x.NetworkId != enemy.NetworkId && x.Distance(target.Position) < 1000))
-                            {
-                                var enemy2Pred = Prediction.GetPrediction(enemy2, .25f);
-
-                                Object[] obj = Util.VectorPointProjectionOnLineSegment(startpos.To2D(), endPos.To2D(), enemy2Pred.CastPosition.To2D());
-                                var isOnseg = (bool)obj[2];
-                                var pointLine = (Vector2)obj[1];
-
-                                if (pointLine.Distance(enemy2Pred.CastPosition.To2D()) < 100 + enemy2.BoundingRadius &&
-                                    isOnseg)
-                                {
-                                    hit++;
-                                }
-                            }
-                        }
-
-                        if (hit > maxHit && !rec1.Points.Exists(Util.IsWall))
-                        {
-                            maxHit = hit;
-                            start = startpos;
-                            end = endPos;
-                        }
-                    }
-                }
-
-                
-                if (maxHit >= 2)
-                {
-                    Vector2 wts = Drawing.WorldToScreen(Player.Position);
-                    Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + maxHit);
-
-                    Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(start, end, R.Width);
-                    rec1.Draw(Color.Red);
-                }
-                //---------------------------------------------------End drawing Ult Mec---------------------------------------
+                SpellCastManager.DrawBestLine(R, R2, (int)(R2.Range/2), .9f);
             }
         }
     }
