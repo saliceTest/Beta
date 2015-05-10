@@ -273,12 +273,12 @@ namespace xSaliceResurrected.Mid
 
         private static void AutoR()
         {
-            if (activeR)
+            if (activeR && rObj != null)
             {
                 foreach (
                     Obj_AI_Hero target in
                         ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(x => x.IsValidTarget(1500)).OrderByDescending(x => x.Distance(rObj.Position)))
+                            .Where(x => x.IsValidTarget(2000)).OrderByDescending(x => x.Distance(rObj.Position)))
                 {
                     if (target != null)
                     {
