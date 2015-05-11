@@ -24,13 +24,13 @@ namespace xSaliceResurrected.Support
             SpellManager.P = new Spell(SpellSlot.Q, 1470);
             SpellManager.Q = new Spell(SpellSlot.Q, 800);
             SpellManager.W = new Spell(SpellSlot.W, 825);
-            SpellManager.E = new Spell(SpellSlot.E, 1100);
+            SpellManager.E = new Spell(SpellSlot.E, 950);
             SpellManager.R = new Spell(SpellSlot.R, 700);
 
             SpellManager.P.SetSkillshot(0.5f, 70f, 1400f, false, SkillshotType.SkillshotLine);
             SpellManager.Q.SetSkillshot(0.8f, 60f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             SpellManager.E.SetSkillshot(0.5f, 70f, 1400f, false, SkillshotType.SkillshotLine);
-            SpellManager.R.SetSkillshot(0.5f, 400f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            SpellManager.R.SetSkillshot(0.1f, 400f, float.MaxValue, false, SkillshotType.SkillshotCircle);
         }
 
         private void LoadMenu()
@@ -51,11 +51,9 @@ namespace xSaliceResurrected.Support
             var combo = new Menu("Combo", "Combo");
             {
                 combo.AddItem(new MenuItem("UseQCombo", "Use Q", true).SetValue(true));
-                combo.AddItem(new MenuItem("qHit", "Q/E HitChance", true).SetValue(new Slider(3, 1, 4)));
                 combo.AddItem(new MenuItem("UseWCombo", "Use W", true).SetValue(true));
                 combo.AddItem(new MenuItem("UseECombo", "Use E", true).SetValue(true));
                 combo.AddItem(new MenuItem("UseRCombo", "Use R", true).SetValue(true));
-                combo.AddItem(new MenuItem("R_Min", "R if >= Enemies, 6 = off", true).SetValue(new Slider(3, 1, 6)));
                 //add to menu
                 menu.AddSubMenu(combo);
             }
@@ -63,9 +61,9 @@ namespace xSaliceResurrected.Support
             var harass = new Menu("Harass", "Harass");
             {
                 harass.AddItem(new MenuItem("UseQHarass", "Use Q", true).SetValue(true));
-                harass.AddItem(new MenuItem("qHit2", "Q/E HitChance", true).SetValue(new Slider(3, 1, 4)));
                 harass.AddItem(new MenuItem("UseWHarass", "Use W", true).SetValue(false));
                 harass.AddItem(new MenuItem("UseEHarass", "Use E", true).SetValue(true));
+                combo.AddSubMenu(HitChanceManager.AddHitChanceMenuCombo(true, false, true, false));
                 ManaManager.AddManaManagertoMenu(harass, "Harass", 30);
                 //add to menu
                 menu.AddSubMenu(harass);
@@ -76,6 +74,7 @@ namespace xSaliceResurrected.Support
                 farm.AddItem(new MenuItem("UseQFarm", "Use Q", true).SetValue(false));
                 farm.AddItem(new MenuItem("UseWFarm", "Use W", true).SetValue(false));
                 farm.AddItem(new MenuItem("UseEFarm", "Use E", true).SetValue(false));
+                harass.AddSubMenu(HitChanceManager.AddHitChanceMenuHarass(true, false, true, false));
                 ManaManager.AddManaManagertoMenu(farm, "LaneClear", 30);
                 //add to menu
                 menu.AddSubMenu(farm);
@@ -84,6 +83,7 @@ namespace xSaliceResurrected.Support
             //Misc Menu:
             var misc = new Menu("Misc", "Misc");
             {
+                misc.AddSubMenu(AoeSpellManager.AddHitChanceMenuCombo(true, false, true, true));
                 misc.AddItem(new MenuItem("E_GapCloser", "Use E for GapCloser", true).SetValue(true));
                 misc.AddItem(new MenuItem("smartKS", "Smart KS", true).SetValue(true));
                 misc.AddItem(new MenuItem("Auto_Bloom", "Auto bloom Plant if Enemy near", true).SetValue(true));
@@ -257,7 +257,7 @@ namespace xSaliceResurrected.Support
             else if (W.Instance.Ammo == 2)// 2 cast
             {
                 Utility.DelayAction.Add(50, () => W.Cast(pos));
-                Utility.DelayAction.Add(150, () => W.Cast(pos));
+                Utility.DelayAction.Add(350, () => W.Cast(pos));
             }
         }
 
@@ -272,27 +272,9 @@ namespace xSaliceResurrected.Support
             if (GetComboDamage(target) > target.Health - 150 && pred.Hitchance >= HitChance.High)
             {
                 R.Cast(target);
-                return;
-            }
-
-            RMec();
-        }
-
-        private void RMec()
-        {
-            var minHit = menu.Item("R_Min", true).GetValue<Slider>().Value;
-
-            if (!R.IsReady() && minHit == 6)
-                return;
-
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range)))
-            {
-                var pred = R.GetPrediction(target, true);
-
-                if (pred.Hitchance >= HitChance.High && pred.AoeTargetsHitCount >= minHit)
-                    R.Cast(pred.CastPosition);
             }
         }
+
 
         private void Farm()
         {
@@ -405,6 +387,7 @@ namespace xSaliceResurrected.Support
 
             if (menu.Item("Escape", true).GetValue<KeyBind>().Active && E.IsReady())
             {
+                Orbwalking.Orbwalk(null, Game.CursorPos);
                 foreach (Obj_AI_Hero target in ObjectManager.Get<Obj_AI_Hero>().Where(x => Player.IsValidTarget(E.Range)).OrderBy(x => x.Distance(Player.Position)))
                 {
                     E.Cast(target);

@@ -1,6 +1,7 @@
 ﻿using LeagueSharp;
 using xSaliceResurrected.ADC;
 using xSaliceResurrected.Mid;
+using xSaliceResurrected.Support;
 using xSaliceResurrected.Top;
 
 namespace xSaliceResurrected
@@ -69,6 +70,10 @@ namespace xSaliceResurrected
                         break;
                     case "urgot":
                         new Urgot();
+                        _loaded = true;
+                        break;
+                    case "zyra":
+                        new Zyra();
                         _loaded = true;
                         break;
                     /*
@@ -144,11 +149,6 @@ namespace xSaliceResurrected
                         break;
                     case "zed":
                         new Zed();
-                        loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
-                        break;
-                    case "zyra":
-                        new Zyra();
                         loaded = true;
                         Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
