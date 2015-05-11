@@ -12,6 +12,12 @@ namespace xSaliceResurrected.Base
         {
             get { return SpellManager.SpellList; }
         }
+
+        protected static Spell P
+        {
+            get { return SpellManager.P; }
+        }
+
         protected static Spell Q
         {
             get { return SpellManager.Q; }

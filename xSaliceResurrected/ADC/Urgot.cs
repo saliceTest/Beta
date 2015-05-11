@@ -316,9 +316,9 @@ namespace xSaliceResurrected.ADC
                 }
 
                 //R
-                if (Player.Distance(target) <= R.Range && Player.GetSpellDamage(target, SpellSlot.R) > target.Health && R.IsReady())
+                if (Player.Distance(target) <= E.Range && Player.GetSpellDamage(target, SpellSlot.E) > target.Health && E.IsReady())
                 {
-                    R.Cast(target);
+                    E.Cast(target);
                     return;
                 }
             }
