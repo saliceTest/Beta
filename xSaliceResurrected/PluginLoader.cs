@@ -18,67 +18,58 @@ namespace xSaliceResurrected
                     case "ahri":
                         new Ahri();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "akali":
                         new Akali();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "azir":
                         new Azir();
-                        _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
+                        _loaded = true;;
                         break;
                     case "chogath":
                         new Chogath();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">NOMNOMNOMNOMNOMNOMNOMNOMNOM LOADED! by xSalice</font>");
                         break;
                     case "corki":
                         new Corki();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "ezreal":
                         new Ezreal();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "fiora":
                         new Fiora();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "irelia":
                         new Irelia();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "katarina":
                         new Katarina();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "jayce":
                         new Jayce();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "rumble":
                         new Rumble();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "viktor":
                         new Viktor();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
                         break;
                     case "vladimir":
                         new Vladimir();
                         _loaded = true;
-                        Game.PrintChat("<font color = \"#FFB6C1\">xSalice's " + ObjectManager.Player.ChampionName + " Loaded!</font>");
+                        break;
+                    case "urgot":
+                        new Urgot();
+                        _loaded = true;
                         break;
                     /*
                     case "anivia":

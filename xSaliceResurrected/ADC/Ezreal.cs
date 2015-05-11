@@ -278,15 +278,21 @@ namespace xSaliceResurrected.ADC
             if (!R.IsReady())
                 return;
 
-            var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-
             var minRange = menu.Item("R_Min_Range", true).GetValue<Slider>().Value;
 
-            if (ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(R.Range)).OrderByDescending(GetComboDamage).
-                Where(unit => menu.Item("Dont_R" + target.BaseSkinName, true) != null).Where(unit => !menu.Item("Dont_R" + target.BaseSkinName, true).GetValue<bool>()).
-                Any(unit => Get_R_Dmg(target) > target.Health && Player.Distance(target.Position) > minRange))
+            foreach (var target in HeroManager.Enemies.Where(x => x.IsValidTarget(R.Range)))
             {
-                R.Cast(target);
+                if (menu.Item("Dont_R" + target.BaseSkinName, true) != null)
+                {
+                    if (!menu.Item("Dont_R" + target.BaseSkinName, true).GetValue<bool>())
+                    {
+                        if (Get_R_Dmg(target) > target.Health && Player.Distance(target.Position) > minRange)
+                        {
+                            R.Cast(target);
+                            return;
+                        }
+                    }
+                }
             }
         }
 

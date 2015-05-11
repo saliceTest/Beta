@@ -21,7 +21,7 @@ namespace xSaliceResurrected.Managers
             if(e)
                 _menuCombo.AddItem(new MenuItem("eHitCombo", "E HitChance", true).SetValue(new StringList(new[] { "Low", "Med", "High", "Very High" }, 2)));
             if(r)
-                _menuCombo.AddItem(new MenuItem("rHitCombo", "R HitChance", true).SetValue(new StringList(new[] { "Low", "Med", "High", "Very High" }, 3)));
+                _menuCombo.AddItem(new MenuItem("rHitCombo", "R HitChance", true).SetValue(new StringList(new[] { "Low", "Med", "High", "Very High" }, 2)));
 
             return _menuCombo;
         }
@@ -37,7 +37,7 @@ namespace xSaliceResurrected.Managers
             if (e)
                 _menuHarass.AddItem(new MenuItem("eHitHarass", "E HitChance", true).SetValue(new StringList(new[] { "Low", "Med", "High", "Very High" }, 2)));
             if (r)
-                _menuHarass.AddItem(new MenuItem("rHitHarass", "R HitChance", true).SetValue(new StringList(new[] { "Low", "Med", "High", "Very High" }, 3)));
+                _menuHarass.AddItem(new MenuItem("rHitHarass", "R HitChance", true).SetValue(new StringList(new[] { "Low", "Med", "High", "Very High" }, 2)));
 
             return _menuHarass;
         }

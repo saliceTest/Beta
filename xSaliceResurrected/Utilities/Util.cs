@@ -10,9 +10,10 @@ namespace xSaliceResurrected.Utilities
     {
         private static readonly Obj_AI_Hero Player = ObjectManager.Player;
 
-        public static bool HasBuff(Obj_AI_Base target, string buffName)
+        public static bool UnderAllyTurret()
         {
-            return target.Buffs.Any(buff => buff.Name == buffName);
+            return
+                ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret != null && (turret.IsAlly && !turret.IsDead && turret.Distance(Player) < 800));
         }
 
         public static bool IsWall(Vector2 pos)

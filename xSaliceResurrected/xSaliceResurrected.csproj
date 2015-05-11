@@ -46,7 +46,7 @@
     <Compile Include="Mid\Akali.cs" />
     <Compile Include="Mid\Azir.cs" />
     <Compile Include="Mid\Jayce.cs" />
-    <Compile Include="Mid\Urgot.cs" />
+    <Compile Include="ADC\Urgot.cs" />
     <Compile Include="Mid\Viktor.cs" />
     <Compile Include="Managers\AOESpellManager.cs" />
     <Compile Include="Managers\HitChanceManager.cs" />
