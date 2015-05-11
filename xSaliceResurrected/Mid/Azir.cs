@@ -488,8 +488,13 @@ namespace xSaliceResurrected.Mid
 
         private void CastW(Obj_AI_Hero target)
         {
-            var vec = Player.Distance(target, true) > W.RangeSqr ? Player.Position.To2D().Extend(target.Position.To2D(), W.Range) : target.Position.To2D();
-            W.Cast(vec);
+            if ((Q.IsReady() || QSpell.State == SpellState.Surpressed) || Player.Distance(Prediction.GetPrediction(target, W.Delay).UnitPosition, true) < W.RangeSqr)
+            {
+                var vec = Player.Distance(target, true) > W.RangeSqr
+                    ? Player.Position.To2D().Extend(target.Position.To2D(), W.Range)
+                    : Prediction.GetPrediction(target, W.Delay).UnitPosition.To2D();
+                W.Cast(vec);
+            }
         }
 
         private void CastQ(Obj_AI_Hero target, string source)

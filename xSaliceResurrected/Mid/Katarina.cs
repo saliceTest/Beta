@@ -608,6 +608,7 @@ namespace xSaliceResurrected.Mid
             
             if (menu.Item("Wardjump", true).GetValue<KeyBind>().Active)
             {
+                Orbwalking.Orbwalk(null, Game.CursorPos);
                 WardJumper.WardJump();
             }
             else if (menu.Item("ComboActive", true).GetValue<KeyBind>().Active)

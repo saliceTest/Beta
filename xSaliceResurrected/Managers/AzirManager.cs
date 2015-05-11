@@ -9,8 +9,7 @@ namespace xSaliceResurrected.Managers
     class AzirManager : Orbwalking.Orbwalker
     {
         private static readonly Obj_AI_Hero MyHero = ObjectManager.Player;
-        public static readonly List<GameObject> Soilders = new List<GameObject>();
-        private static readonly IEnumerable<Obj_AI_Hero> AllEnemys = ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.IsEnemy);
+        public static readonly List<Obj_AI_Minion> Soilders = new List<Obj_AI_Minion>();
 
         public AzirManager(Menu attachToMenu) : base(attachToMenu)
         {
@@ -21,7 +20,7 @@ namespace xSaliceResurrected.Managers
             var unit = (Obj_AI_Base)target;
             var dmg = MyHero.GetSpellDamage(unit, SpellSlot.W);
 
-            var count = Soilders.Count(obj => obj.Position.Distance(unit.Position) < 380);
+            var count = Soilders.Count(obj => obj.Position.Distance(unit.Position) < 350);
 
             if (count > 1)
                 return dmg + dmg * (count - 1);
@@ -79,11 +78,11 @@ namespace xSaliceResurrected.Managers
             if (ActiveMode == Orbwalking.OrbwalkingMode.Mixed || ActiveMode == Orbwalking.OrbwalkingMode.LastHit || ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
                 foreach (var minion in from minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValidTarget() && minion.Name != "Beacon" && InAutoAttackRange(minion)
-                && minion.Health < 2 * (MyHero.BaseAttackDamage + MyHero.FlatPhysicalDamageMod))
+                && minion.Health < 3 * (MyHero.BaseAttackDamage + MyHero.FlatPhysicalDamageMod))
                                        let t = (int)(MyHero.AttackCastDelay * 1000) - 100 + Game.Ping / 2
                                        let predHealth = HealthPrediction.GetHealthPrediction(minion, t, 0)
                                        where minion.Team != GameObjectTeam.Neutral && predHealth > 0 &&
-                                             predHealth <= MyHero.GetAutoAttackDamage(minion, true)
+                                             predHealth <= (InSoldierAttackRange(minion) ? GetAzirAaSandwarriorDamage(minion) - 25 : MyHero.GetAutoAttackDamage(minion, true))
                                        select minion)
                     return minion;
             }
@@ -142,43 +141,26 @@ namespace xSaliceResurrected.Managers
 
         private Obj_AI_Hero GetBestHeroTarget()
         {
-            Obj_AI_Hero killableEnemy = null;
-            var hitsToKill = double.MaxValue;
-
-            foreach (var enemy in AllEnemys.Where(hero => hero.IsValidTarget() && InAutoAttackRange(hero)))
-            {
-                var killHits = CountKillhits(enemy);
-                if (killableEnemy != null && (!(killHits < hitsToKill) || enemy.HasBuffOfType(BuffType.Invulnerability)))
-                    continue;
-                hitsToKill = killHits;
-                killableEnemy = enemy;
-            }
             var bestTarget = HeroManager.Enemies.Where(InAutoAttackRange).OrderByDescending(GetAzirAaSandwarriorDamage).FirstOrDefault();
 
-            return hitsToKill <= 3 ? killableEnemy : bestTarget ?? TargetSelector.GetTarget(GetAutoAttackRange(), TargetSelector.DamageType.Magical);
+            return bestTarget ?? TargetSelector.GetTarget(GetAutoAttackRange(), TargetSelector.DamageType.Magical);
         }
 
         public static void OnDelete(GameObject sender, EventArgs args)
         {
-            if (sender.Name == "Azir_Base_P_Soldier_Ring.troy" && Soilders.Count > 0)
-            {
-                //Game.PrintChat("Solider Deleted" + sender.NetworkId);
-                foreach (var minion in Soilders.ToList())
-                {
-                    if (minion.NetworkId == sender.NetworkId)
-                    {
-                        Soilders.Remove(minion);
-                    }
-                }
-            }
+            Soilders.RemoveAll(s => s.NetworkId == sender.NetworkId);
         }
 
         public static void Obj_OnCreate(GameObject sender, EventArgs args)
         {
-            if (sender.Name == "Azir_Base_P_Soldier_Ring.troy")
+            if (!(sender is Obj_AI_Minion))
+                return;
+
+            if (sender.Name == "AzirSoldier" && sender.IsAlly)
             {
-                Console.WriteLine("added");
-                Soilders.Add(sender);
+                Obj_AI_Minion soldier = (Obj_AI_Minion) sender;
+                if (soldier.SkinName == "AzirSoldier")
+                    Soilders.Add(soldier);
             }
         }
     }
