@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-using SharpDX;
 using xSaliceResurrected.Managers;
 using xSaliceResurrected.Utilities;
 using Color = System.Drawing.Color;
@@ -22,6 +21,7 @@ namespace xSaliceResurrected.Top
         private void LoadSpells()
         {
             //intalize spell
+            SpellManager.P = new Spell(SpellSlot.R, 4000);
             SpellManager.Q = new Spell(SpellSlot.Q, 500);
             SpellManager.W = new Spell(SpellSlot.W);
             SpellManager.E = new Spell(SpellSlot.E, 950);
@@ -29,6 +29,7 @@ namespace xSaliceResurrected.Top
             SpellManager.R2 = new Spell(SpellSlot.R, 1000);
 
             SpellManager.E.SetSkillshot(0.25f, 70, 1200, true, SkillshotType.SkillshotLine);
+            SpellManager.P.SetSkillshot(0.4f, 130, 2500, false, SkillshotType.SkillshotCircle);
             SpellManager.R.SetSkillshot(0.4f, 130, 2500, false, SkillshotType.SkillshotCircle);
             SpellManager.R2.SetSkillshot(0.4f, 130, 2600, false, SkillshotType.SkillshotCircle);
         }

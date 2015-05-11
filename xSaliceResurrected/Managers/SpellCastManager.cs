@@ -72,24 +72,28 @@ namespace xSaliceResurrected.Managers
 
             spell2.UpdateSourcePosition(vector1, vector1);
 
-            var pred = spell2.GetPrediction(target, true);
+            var pred = Prediction.GetPrediction(target, spell.Delay);
             Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
 
             if (Player.Distance(target) < spell.Range)
             {
-                vector1 = pred.CastPosition.Extend(target.ServerPosition, spell2.Range*.3f);
-                spell2.UpdateSourcePosition(vector1, vector1);
-                Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
+                var vector2 = pred.CastPosition.Extend(target.ServerPosition, spell2.Range*.3f);
+                Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector2, vector2.Extend(pred.CastPosition, spell2.Range), spell.Width);
 
-                if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.Medium)
-                    CastLineSpell(spell2, vector1, vector1.Extend(pred.CastPosition, spell2.Range));
+                if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.High)
+                {
+                    spell2.UpdateSourcePosition(vector2, vector2);
+                    CastLineSpell(vector1, pred.CastPosition);
+                }
 
             }
             else if (!rec1.Points.Exists(Util.IsWall) || !wallCheck)
             {
                 //wall check
-                if (pred.Hitchance >= HitChance.Medium)
-                    CastLineSpell(spell2, vector1, vector1.Extend(pred.CastPosition, spell2.Range));
+                if (pred.Hitchance >= HitChance.High)
+                {
+                    CastLineSpell(vector1, pred.CastPosition);
+                }
             }
         }
 
@@ -153,11 +157,11 @@ namespace xSaliceResurrected.Managers
             {
                 spell2.UpdateSourcePosition(start, start);
                 if (forceUlt)
-                    CastLineSpell(spell2, start, end);
+                    CastLineSpell(start, end);
                 if (menu.Item("ComboActive", true).GetValue<KeyBind>().Active && maxHit >= menu.Item("Line_If_Enemy_Count_Combo", true).GetValue<Slider>().Value)
-                    CastLineSpell(spell2, start, end);
+                    CastLineSpell(start, end);
                 if (maxHit >= menu.Item("Line_If_Enemy_Count", true).GetValue<Slider>().Value)
-                    CastLineSpell(spell2, start, end);
+                    CastLineSpell(start, end);
             }            
 
             //check if only one target
@@ -230,53 +234,54 @@ namespace xSaliceResurrected.Managers
 
                 Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(start, end, spell.Width);
                 rec1.Draw(Color.Blue, 4);
-                return;
             }
+            else { 
 
-            //-------------------------------Single---------------------------
-            var unit = TargetSelector.GetTarget(spell.Range + spell2.Range, TargetSelector.DamageType.Magical);
+                //-------------------------------Single---------------------------
+                var target = TargetSelector.GetTarget(spell.Range + spell2.Range, TargetSelector.DamageType.Magical);
 
-            if (unit == null)
-                return;
+                if (target == null)
+                    return;
 
-            var vector1 = Player.ServerPosition + Vector3.Normalize(unit.ServerPosition - Player.ServerPosition) * (spell.Range * extraPrerange);
+                var vector1 = Player.ServerPosition + Vector3.Normalize(target.ServerPosition - Player.ServerPosition) * (spell.Range * extraPrerange);
 
-            var pred = spell2.GetPrediction(unit, true);
-            Geometry.Polygon.Rectangle rectangle = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
+                var pred = Prediction.GetPrediction(target, spell.Delay);
+                Geometry.Polygon.Rectangle rec1 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
 
-            if (Player.Distance(unit) < spell.Range)
-            {
-                vector1 = pred.CastPosition.Extend(unit.ServerPosition, spell2.Range * .3f);
-                Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
-
-                if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.Medium)
+                if (Player.Distance(target) < spell.Range)
                 {
-                    Vector2 wts = Drawing.WorldToScreen(Player.Position);
-                    Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
+                    vector1 = pred.CastPosition.Extend(target.ServerPosition, spell2.Range * .3f);
+                    Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector1, vector1.Extend(pred.CastPosition, spell2.Range), spell.Width);
 
-                    rec2.Draw(Color.Blue, 4);
+                    if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.High)
+                    {
+                        Vector2 wts = Drawing.WorldToScreen(Player.Position);
+                        Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
+
+                        rec2.Draw(Color.Blue, 4);
+                    }
+
                 }
+                else if (!rec1.Points.Exists(Util.IsWall) || !wallCheck)
+                   {
+                    //wall check
+                    if (pred.Hitchance >= HitChance.High)
+                    {
+                        Vector2 wts = Drawing.WorldToScreen(Player.Position);
+                        Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
 
-            }
-            else if (!rectangle.Points.Exists(Util.IsWall) || !wallCheck)
-            {
-                //wall check
-                if (pred.Hitchance >= HitChance.Medium)
-                {
-                    Vector2 wts = Drawing.WorldToScreen(Player.Position);
-                    Drawing.DrawText(wts[0], wts[1], Color.Wheat, "Hit: " + 1);
-
-                    rectangle.Draw(Color.Blue, 4);
+                        rec1.Draw(Color.Blue, 4);
+                    }
                 }
             }
         }
 
-        public static void CastLineSpell(Spell spell, Vector3 start, Vector3 end)
+        public static void CastLineSpell(Vector3 start, Vector3 end)
         {
-            if (!spell.IsReady())
+            if (!SpellManager.P.IsReady())
                 return;
 
-            spell.Cast(start, end);
+            SpellManager.P.Cast(start, end);
         }
     }
 }

@@ -25,6 +25,7 @@ namespace xSaliceResurrected.Mid
         private void LoadSpells()
         {
             //intalize spell
+            SpellManager.P = new Spell(SpellSlot.E, 3000);
             SpellManager.Q = new Spell(SpellSlot.Q, 700);
             SpellManager.W = new Spell(SpellSlot.W, 700);
             SpellManager.E = new Spell(SpellSlot.E, 540);
@@ -34,6 +35,7 @@ namespace xSaliceResurrected.Mid
             SpellManager.W.SetSkillshot(.25f, 300, float.MaxValue, false, SkillshotType.SkillshotCircle);
             SpellManager.E.SetSkillshot(0.2f, 90, 1000, false, SkillshotType.SkillshotCircle);
             SpellManager.E2.SetSkillshot(0.2f, 90, 1000, false, SkillshotType.SkillshotCircle);
+            SpellManager.P.SetSkillshot(0.2f, 90, 1000, false, SkillshotType.SkillshotCircle);
             SpellManager.R.SetSkillshot(0.25f, 250, float.MaxValue, false, SkillshotType.SkillshotCircle);
         }
 
@@ -405,7 +407,7 @@ namespace xSaliceResurrected.Mid
 
                 if (pred.MinionsHit > 1)
                 {
-                    SpellCastManager.CastLineSpell(E2, minionsE[0].ServerPosition, pred.Position.To3D());
+                    SpellCastManager.CastLineSpell(minionsE[0].ServerPosition, pred.Position.To3D());
                 }
             }
         }
@@ -469,9 +471,9 @@ namespace xSaliceResurrected.Mid
                 if (R.Level > 0)
                     Render.Circle.DrawCircle(Player.Position, R.Range, R.IsReady() ? Color.Green : Color.Red);
 
-            if (menu.Item("Draw_E_Pred", true).GetValue<bool>())
+            if (menu.Item("Draw_E_Pred", true).GetValue<bool>() && E.IsReady())
             {
-                SpellCastManager.DrawBestLine(E, E, (int)(E.Range / 2), 1, false);
+                SpellCastManager.DrawBestLine(E, E2, (int)(E2.Range / 2), 1, false);
             }
             
         }
