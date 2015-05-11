@@ -59,8 +59,11 @@ namespace xSaliceResurrected.Managers
             }
         }
 
+        private static int _lastCast;
         public static void CastSingleLine(Spell spell, Spell spell2, bool wallCheck, float extraPrerange = 1)
         {
+            if (!spell.IsReady() || Utils.TickCount - _lastCast < 0)
+                return;
 
             //-------------------------------Single---------------------------
             var target = TargetSelector.GetTarget(spell.Range + spell2.Range, TargetSelector.DamageType.Magical);
@@ -83,7 +86,8 @@ namespace xSaliceResurrected.Managers
                 if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.High)
                 {
                     spell2.UpdateSourcePosition(vector2, vector2);
-                    CastLineSpell(vector1, pred.CastPosition);
+                    CastLineSpell(vector2, pred.CastPosition);
+                    _lastCast = Utils.TickCount + 500;
                 }
 
             }
@@ -97,9 +101,11 @@ namespace xSaliceResurrected.Managers
             }
         }
 
-        //rumble = R, R2, 600
         public static void CastBestLine(bool forceUlt, Spell spell, Spell spell2, int midPointRange, Menu menu, float extraPrerange = 1, bool wallCheck = true)
         {
+            if (!spell.IsReady())
+                return;
+
             int maxHit = 0;
             Vector3 start = Vector3.Zero;
             Vector3 end = Vector3.Zero;
