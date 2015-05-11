@@ -83,10 +83,10 @@ namespace xSaliceResurrected.Managers
                 var vector2 = pred.CastPosition.Extend(target.ServerPosition, spell2.Range*.3f);
                 Geometry.Polygon.Rectangle rec2 = new Geometry.Polygon.Rectangle(vector2, vector2.Extend(pred.CastPosition, spell2.Range), spell.Width);
 
-                if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.High)
+                if ((!rec2.Points.Exists(Util.IsWall) || !wallCheck) && pred.Hitchance >= HitChance.High && target.IsMoving)
                 {
                     spell2.UpdateSourcePosition(vector2, vector2);
-                    CastLineSpell(vector2, pred.CastPosition);
+                    CastLineSpell(vector2, vector2.Extend(pred.CastPosition, spell2.Range));
                     _lastCast = Utils.TickCount + 500;
                 }
 

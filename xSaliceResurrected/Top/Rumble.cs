@@ -29,9 +29,9 @@ namespace xSaliceResurrected.Top
             SpellManager.R2 = new Spell(SpellSlot.R, 1000);
 
             SpellManager.E.SetSkillshot(0.25f, 70, 1200, true, SkillshotType.SkillshotLine);
-            SpellManager.P.SetSkillshot(0.4f, 130, 2500, false, SkillshotType.SkillshotCircle);
-            SpellManager.R.SetSkillshot(0.4f, 130, 2500, false, SkillshotType.SkillshotCircle);
-            SpellManager.R2.SetSkillshot(0.4f, 130, 2600, false, SkillshotType.SkillshotCircle);
+            SpellManager.P.SetSkillshot(0.4f, 130, 2500, false, SkillshotType.SkillshotLine);
+            SpellManager.R.SetSkillshot(0.4f, 130, 2500, false, SkillshotType.SkillshotLine);
+            SpellManager.R2.SetSkillshot(0.4f, 130, 2600, false, SkillshotType.SkillshotLine);
         }
 
         private void LoadMenu()
