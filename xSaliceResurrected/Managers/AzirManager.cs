@@ -28,11 +28,6 @@ namespace xSaliceResurrected.Managers
             return dmg;
         }
 
-        private static double CountKillhits(Obj_AI_Base enemy)
-        {
-            return enemy.Health / MyHero.GetAutoAttackDamage(enemy);
-        }
-
         private static bool InSoldierAttackRange(AttackableUnit target)
         {
             return Soilders.Count(obj => obj.Position.Distance(target.Position) < 350 && MyHero.Distance(target) < 1000) > 0;
